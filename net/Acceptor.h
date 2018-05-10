@@ -1,3 +1,6 @@
+#ifndef ACCEPTOR_H
+#define ACCEPTOR_H
+
 #include<boost/function.hpp>
 #include<boost/noncopyable.hpp>
 
@@ -28,3 +31,4 @@ private:
     bool listenning_;
     int idleFd_;
 };
+#endif // !ACCEPTOR_H
