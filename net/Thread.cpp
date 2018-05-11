@@ -109,7 +109,7 @@ void CurrentThread::cacheTid()
     }
 }
 
-std::atomic<int> numCreated_(0);
+std::atomic_int Thread::numCreated_(0);
 
 Thread::Thread(const ThreadFunc& func,const std::string& n)
     :started_(false),

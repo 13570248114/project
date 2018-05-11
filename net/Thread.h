@@ -30,6 +30,6 @@ private:
     ThreadFunc func_;
     std::string     name_;
     muduo::CountDownLatch latch_;
-    static std::atomic<int> numCreated_;
+    static std::atomic_int numCreated_;
 };
 #endif // !THREAD_H

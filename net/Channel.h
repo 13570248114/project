@@ -5,7 +5,7 @@
 #include<boost/noncopyable.hpp>
 #include<boost/shared_ptr.hpp>
 #include<boost/weak_ptr.hpp>
-#include"Timestamp.h"
+#include<muduo/base/Timestamp.h>
 #include<assert.h>
 
 class EventLoop;
@@ -28,6 +28,9 @@ public:
     void set_index(int idx) { index_ = idx; }
     bool isNoneEvent() const { return events_ == kNoneEvent; }
     void remove();
+    void set_revents(int revt) { revents_ = revt; } // used by pollers
+    void handleEvent(muduo::Timestamp receiveTime);
+    void tie(const boost::shared_ptr<void>&);
 
 private:
     static const int kNoneEvent;
@@ -42,5 +45,13 @@ private:
     bool eventHandling_;
     bool addedToLoop_;
     int   index_; // used by Poller.
+
+    void handleEventWithGuard(muduo::Timestamp receiveTime);
+    boost::weak_ptr<void> tie_;
+    bool tied_;
+
+    EventCallback writeCallback_;
+    EventCallback closeCallback_;
+    EventCallback errorCallback_;
 };
 #endif // !CHANNEL_H

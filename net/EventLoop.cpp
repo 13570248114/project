@@ -3,6 +3,8 @@
 #include"Poller.h"
 #include"CurrentThread.h"
 
+const int kPollTimeMs = 10000;
+
 void EventLoop::updateChannel(Channel* channel)
 {
     poller_->updateChannel(channel);
@@ -41,7 +43,18 @@ void EventLoop::loop()
     while(!quit_)
     {
         activeChannels_.clear();
-
+        pollReturnTime_=poller_->poll(kPollTimeMs,&activeChannels_);
+        ++iteration_;
+        eventHandling_=true;
+        for(ChannelList::iterator it=activeChannels_.begin();it!=activeChannels_.end();++it)
+        {
+            currentActiveChannel_=*it;
+            currentActiveChannel_->handleEvent(pollReturnTime_);
+        }
+        currentActiveChannel_=NULL;
+        eventHandling_=false;
+        //doPendingFunctors
     }
+    looping_=false;
 }
 

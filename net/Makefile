@@ -1,0 +1,23 @@
+MUDUO_DIRECTORY ?= $(HOME)/build/release-install
+#MUDUO_DIRECTORY ?= $(HOME)/build/install
+MUDUO_INCLUDE = $(MUDUO_DIRECTORY)/include
+MUDUO_LIBRARY = $(MUDUO_DIRECTORY)/lib
+SRC = ./*.cpp
+
+CXXFLAGS = -g -O0 -Wall -Wextra  \
+	   -Wconversion -Wno-unused-parameter \
+	   -Wold-style-cast -Woverloaded-virtual \
+	   -Wpointer-arith -Wshadow -Wwrite-strings \
+	   -march=native -rdynamic -std=c++11\
+	   -I$(MUDUO_INCLUDE) 
+
+LDFLAGS = -L$(MUDUO_LIBRARY) -lmuduo_net -lmuduo_base -lpthread -lrt
+
+all: obj
+clean:
+	rm -f echo core
+
+obj: $(SRC)
+	g++ $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+.PHONY: all clean

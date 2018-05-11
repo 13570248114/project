@@ -35,3 +35,56 @@ void Channel::remove()
     addedToLoop_ = false;
     loop_->removeChannel(this);
 }
+
+void Channel::handleEvent(muduo::Timestamp receiveTime)
+{
+    boost::shared_ptr<void> guard;
+    if(tied_)
+    {
+        guard=tie_.lock();
+        if(guard)
+        {
+            handleEventWithGuard(receiveTime);
+        }
+    }
+    else
+    {
+        handleEventWithGuard(receiveTime);
+    }
+    
+}
+
+void Channel::handleEventWithGuard(muduo::Timestamp receiveTime)
+{
+    eventHandling_=true;
+    if((revents_&POLLHUP)&&!(revents_&POLLIN))
+    {
+        printf("Channel::handle_event() POLLHUP");
+        if(closeCallback_)
+            closeCallback_();
+    }
+
+    if(revents_&POLLNVAL)
+    {
+        printf("Channel::handle_event() POLLNVAL");
+    }
+
+    if(revents_&(POLLERR|POLLNVAL))
+    {
+        if(errorCallback_)
+            errorCallback_();
+    }
+
+    if(revents_&(POLLIN|POLLPRI|POLLRDHUP))
+    {
+        if(readCallback_)
+            readCallback_(receiveTime);
+    }
+
+    if(revents_&POLLOUT)
+    {
+        if(writeCallback_)
+            writeCallback_();
+    }
+    eventHandling_ = false;
+}

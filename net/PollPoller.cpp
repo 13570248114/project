@@ -42,7 +42,7 @@ void PollPoller::updateChannel(Channel* channel)
 }
 
 Poller* Poller::newDefaultPoller(EventLoop* loop){
-    return new PollPoller(loop);
+    return (new PollPoller(loop));
 }
 
 void PollPoller::removeChannel(Channel* channel)
@@ -78,6 +78,35 @@ void PollPoller::fillActiveChannels(int numEvents,ChannelList* activeChannels) c
             --numEvents;
             ChannelMap::const_iterator ch =channels_.find(pfd->fd);
             assert(ch!=channels_.end());
+            Channel* channel=ch->second;
+            assert(channel->fd()==pfd->fd);
+            channel->set_revents(pfd->revents);               //key
+            activeChannels->push_back(channel);
         }
     }
+}
+
+muduo::Timestamp PollPoller::poll(int timeoutMs, ChannelList* activeChannels)
+{
+    int numEvents = ::poll(&*pollfds_.begin(),pollfds_.size(),timeoutMs);
+    int savedErrno = errno;
+    muduo::Timestamp now(muduo::Timestamp::now());
+    if(numEvents>0)
+    {
+        printf("events happened\n");
+        fillActiveChannels(numEvents,activeChannels);
+    }
+    else if(numEvents==0)
+    {
+        printf("nothing happened\n");
+    }
+    else
+    {
+        if(savedErrno!=EINTR)
+        {
+            errno=savedErrno;
+            printf("PollPoller::poll()\n");
+        }
+    }
+    return now;
 }

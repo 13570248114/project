@@ -38,7 +38,7 @@ public:
     virtual ~PollPoller();
     virtual void updateChannel(Channel* channel);
     virtual void removeChannel(Channel* channel);
-    virtual muduo::Timestamp poll(int timeoutMs,ChannelList* activeChannels)=0;
+    virtual muduo::Timestamp poll(int timeoutMs,ChannelList* activeChannels);
 
 private:
     void fillActiveChannels(int numEvents,
