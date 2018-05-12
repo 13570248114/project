@@ -13,6 +13,7 @@ public:
     void bindAddress(const InetAddress& addr);
     void listen();
     int accept(InetAddress* peeraddr);
+    void setKeepAlive(bool on);
 private:
     int sockfd_;
 };

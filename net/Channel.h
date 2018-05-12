@@ -18,6 +18,12 @@ public:
     ~Channel();
     void setReadCallback(ReadEventCallback&& cb)
     {readCallback_=std::move(cb);}
+    void setWriteCallback(EventCallback&& cb)
+    { writeCallback_ = std::move(cb); }
+    void setCloseCallback(EventCallback&& cb)
+    { closeCallback_ = std::move(cb); }
+    void setErrorCallback(EventCallback&& cb)
+    { errorCallback_ = std::move(cb); }
     void disableAll(){events_=kNoneEvent;update();}
     void enableReading(){events_|=kReadEvent;update();}
     void update();
