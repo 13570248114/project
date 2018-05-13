@@ -26,6 +26,7 @@ public:
     { errorCallback_ = std::move(cb); }
     void disableAll(){events_=kNoneEvent;update();}
     void enableReading(){events_|=kReadEvent;update();}
+    void enableWriting() { events_ |= kWriteEvent; update(); }
     void update();
     EventLoop* ownerLoop() { return loop_; }
     int index() { return index_; }
@@ -37,6 +38,8 @@ public:
     void set_revents(int revt) { revents_ = revt; } // used by pollers
     void handleEvent(muduo::Timestamp receiveTime);
     void tie(const boost::shared_ptr<void>&);
+    bool isWriting() const { return events_ & kWriteEvent; }
+    bool isReading() const { return events_ & kReadEvent; }
 
 private:
     static const int kNoneEvent;

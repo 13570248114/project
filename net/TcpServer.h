@@ -5,7 +5,7 @@
 #include<boost/noncopyable.hpp>
 #include<boost/scoped_ptr.hpp>
 #include<boost/shared_ptr.hpp>
-#include""
+#include"TcpConnection.h"
 
 class Acceptor;
 class EventLoop;
@@ -27,6 +27,10 @@ public:
      const std::string& ipPort() const { return ipPort_; }
      const std::string& name() const { return name_; }
      EventLoop* getLoop() const { return loop_; }
+
+     void setThreadNum(int numThreads);
+     void setThreadInitCallback(const ThreadInitCallback& cb)
+     { threadInitCallback_ = cb; }
 
      std::atomic_int start_;
      EventLoop* loop_;  // the acceptor loop

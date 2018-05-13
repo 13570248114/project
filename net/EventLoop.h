@@ -10,6 +10,7 @@
 
 #include<muduo/base/Mutex.h>
 #include<muduo/base/Timestamp.h>
+#include<muduo/base/Mutex.h>
 #include"CurrentThread.h"
 
 
@@ -34,10 +35,22 @@ public:
         if(!isInLoopThread())
             abortNotInLoopThread();
     }
+    void runInLoop(const Functor& cb);
+    void runInLoop(Functor&& cb);
+
+    void queueInLoop(const Functor& cb);
+    void queueInLoop(Functor&& cb);
+    size_t queueSize() const;
+
+    void wakeup();
+    bool hasChannel(Channel* channel);
+
 
 private:
     const pid_t threadId_;
     void abortNotInLoopThread(){};
+    void handleRead();  // waked up
+    void doPendingFunctors();
    // boost::scoped_ptr<Poller> poller_;
     Poller* poller_;
     bool looping_; /* atomic */
@@ -50,5 +63,12 @@ private:
     typedef std::vector<Channel*> ChannelList;
     ChannelList activeChannels_;
     Channel* currentActiveChannel_;
+
+    int wakeupFd_;
+    boost::scoped_ptr<Channel> wakeupChannel_;
+
+    mutable muduo::MutexLock mutex_;
+    std::vector<Functor> pendingFunctors_;
+
 };
 #endif // !EVENTLOOP_H

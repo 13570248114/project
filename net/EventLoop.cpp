@@ -2,12 +2,28 @@
 #include"Channel.h"
 #include"Poller.h"
 #include"CurrentThread.h"
+#include"SocketsOps.h"
+#include<sys/eventfd.h>
+#include<boost/bind.hpp>
 
 const int kPollTimeMs = 10000;
 
 void EventLoop::updateChannel(Channel* channel)
 {
     poller_->updateChannel(channel);
+}
+
+__thread EventLoop* t_loopInThisThread = 0;
+
+int createEventfd()
+{
+    int evtfd =::eventfd(0,EFD_NONBLOCK|EFD_CLOEXEC);
+    if(evtfd<0)
+    {
+        printf("Failed in eventfd");
+        abort();
+    }
+    return evtfd;
 }
 
 
@@ -18,9 +34,20 @@ EventLoop::EventLoop()
      callingPendingFunctors_(false),
      iteration_(0),
      threadId_(CurrentThread::tid()),
-     poller_(Poller::newDefaultPoller(this))
+     poller_(Poller::newDefaultPoller(this)),
+     wakeupFd_(createEventfd()),
+     wakeupChannel_(new Channel(this, wakeupFd_))
 {
-
+    if(t_loopInThisThread)
+    {
+        printf("Another EventLoop  exists in this thread");
+    }
+    else
+    {
+        t_loopInThisThread = this;
+    }
+    wakeupChannel_->setReadCallback(boost::bind(&EventLoop::handleRead,this));
+    wakeupChannel_->enableReading();
 }
 
 void EventLoop::removeChannel(Channel* channel)
@@ -53,8 +80,96 @@ void EventLoop::loop()
         }
         currentActiveChannel_=NULL;
         eventHandling_=false;
-        //doPendingFunctors
+        doPendingFunctors();
     }
     looping_=false;
 }
 
+void EventLoop::wakeup()
+{
+    uint64_t one = 1;
+    ssize_t n = sockets::write(wakeupFd_,&one,sizeof(one));
+    (void)n;
+}
+
+
+void EventLoop::handleRead()
+{
+    uint64_t one = 1;
+    ssize_t n = sockets::read(wakeupFd_,&one,sizeof(one));
+    (void)n;
+}
+
+void EventLoop::queueInLoop(const Functor& cb)
+{
+    {
+        muduo::MutexLockGuard lock(mutex_);
+        pendingFunctors_.push_back(cb);
+    }
+
+    if(!isInLoopThread()||callingPendingFunctors_)
+    {
+        wakeup();
+    }
+}
+
+size_t EventLoop::queueSize() const
+{
+    muduo::MutexLockGuard lock(mutex_);
+    return pendingFunctors_.size();
+}
+
+void EventLoop::queueInLoop(Functor&& cb)
+{
+  {
+      muduo::MutexLockGuard lock(mutex_);
+      pendingFunctors_.push_back(std::move(cb));  // emplace_back
+  }
+
+  if (!isInLoopThread() || callingPendingFunctors_)
+  {
+      wakeup();
+  }
+}
+
+void EventLoop::doPendingFunctors()
+{
+    std::vector<Functor> functors;
+    callingPendingFunctors_=true;
+
+    {
+        muduo::MutexLockGuard lock(mutex_);
+        functors.swap(pendingFunctors_);
+    }
+
+    for(size_t i=0;i<functors.size();i++)
+    {
+        functors[i]();
+    }
+    callingPendingFunctors_=false;
+}
+
+void EventLoop::runInLoop(const Functor& cb)
+{
+    if(isInLoopThread())
+    {
+        cb();
+    }
+    else
+    {
+        queueInLoop(cb);
+    }
+}
+
+void EventLoop::runInLoop(Functor&& cb)
+{
+    
+  if (isInLoopThread())
+  {
+    cb();
+  }
+  else
+  {
+      queueInLoop(std::move(cb));
+  }
+}

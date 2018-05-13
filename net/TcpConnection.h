@@ -39,6 +39,15 @@ public:
 
     void send(const void* message, int len);
     void send(const muduo::StringPiece& message);
+    void send(Buffer* buf);
+
+    void shutdown(); 
+
+    void forceClose();
+    void forceCloseWithDelay(double seconds);
+    void setTcpNoDelay(bool on);
+
+
 private:
     enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
     void handleRead(muduo::Timestamp receiveTime);
@@ -65,11 +74,11 @@ private:
     boost::scoped_ptr<Channel> channel_;
     const InetAddress localAddr_;
     const InetAddress peerAddr_;
-    net::ConnectionCallback connectionCallback_;
-    net::MessageCallback messageCallback_;
-    net::WriteCompleteCallback writeCompleteCallback_;
-    net::HighWaterMarkCallback highWaterMarkCallback_;
-    net::CloseCallback closeCallback_;
+    ConnectionCallback connectionCallback_;
+    MessageCallback messageCallback_;
+    WriteCompleteCallback writeCompleteCallback_;
+    HighWaterMarkCallback highWaterMarkCallback_;
+    CloseCallback closeCallback_;
     size_t highWaterMark_;
     Buffer inputBuffer_;
     Buffer outputBuffer_;

@@ -6,8 +6,7 @@
 
 #include <muduo/base/Timestamp.h>
 
-namespace net
-{
+
     class Buffer;
     class TcpConnection;
     typedef boost::shared_ptr<TcpConnection> TcpConnectionPtr;
@@ -25,6 +24,6 @@ namespace net
     void defaultMessageCallback(const TcpConnectionPtr& conn,
                             Buffer* buffer,
                             muduo::Timestamp receiveTime);
-}
+
 #endif // !CALLBACKS_H
 
