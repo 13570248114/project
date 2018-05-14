@@ -102,3 +102,15 @@ void sockets::shutdownWrite(int sockfd)
         printf("sockets::shutdownWrite");
     }
 }
+
+struct sockaddr_in sockets::getLocalAddr(int sockfd)
+{
+    struct sockaddr_in localAddr;
+    bzero(&localAddr,sizeof(localAddr));
+    socklen_t addrlen = static_cast<socklen_t>(sizeof(localAddr));
+    if(::getsockname(sockfd,sockaddr_cast(&localAddr),&addrlen)<0)
+    {
+        printf("sockets::getLocalAddr");
+    }
+    return localAddr;
+}

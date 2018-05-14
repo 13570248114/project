@@ -47,6 +47,9 @@ public:
     void forceCloseWithDelay(double seconds);
     void setTcpNoDelay(bool on);
 
+    void connectDestroyed();  // should be called only once
+    void connectEstablished();   // should be called only once
+
 
 private:
     enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
