@@ -9,6 +9,9 @@ class InetAddress
 {
 public:
     explicit InetAddress(uint16_t port = 0, bool loopbackOnly = false, bool ipv6 = false);
+    explicit InetAddress(const struct sockaddr_in& addr)
+    : addr_(addr)
+    { }
     sa_family_t family() const {return addr_.sin_family;}
     const struct sockaddr* getSockAddr() const {return sockets::sockaddr_cast(&addr_);}
     void setSockAddrInet(const struct sockaddr_in& addr) { addr_ = addr; }

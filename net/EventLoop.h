@@ -12,6 +12,8 @@
 #include<muduo/base/Timestamp.h>
 #include<muduo/base/Mutex.h>
 #include"CurrentThread.h"
+#include"Callbacks.h"
+#include<muduo/net/TimerId.h>
 
 
 class Channel;
@@ -44,6 +46,10 @@ public:
 
     void wakeup();
     bool hasChannel(Channel* channel);
+
+    muduo::net::TimerId runAt(const muduo::Timestamp& time, const TimerCallback& cb);
+    muduo::net::TimerId runAfter(double delay, const TimerCallback& cb);
+    muduo::net::TimerId runEvery(double interval, const TimerCallback& cb);
 
 
 private:

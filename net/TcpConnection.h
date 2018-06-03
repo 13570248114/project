@@ -50,6 +50,21 @@ public:
     void connectDestroyed();  // should be called only once
     void connectEstablished();   // should be called only once
 
+    void setCloseCallback(const CloseCallback& cb)
+    { closeCallback_ = cb; }
+
+     void setConnectionCallback(const ConnectionCallback& cb)
+     { connectionCallback_ = cb; }
+
+     void setWriteCompleteCallback(const WriteCompleteCallback& cb)
+     { writeCompleteCallback_ = cb; } 
+
+     void setHighWaterMarkCallback(const HighWaterMarkCallback& cb, size_t highWaterMark)
+     { highWaterMarkCallback_ = cb; highWaterMark_ = highWaterMark; }
+
+     void setMessageCallback(const MessageCallback& cb)
+    { messageCallback_ = cb; }
+
 
 private:
     enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };

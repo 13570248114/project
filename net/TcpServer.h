@@ -53,6 +53,7 @@ private:
      typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;
 
      boost::scoped_ptr<Acceptor> acceptor_; // avoid revealing Acceptor
+     boost::shared_ptr<EventLoopThreadPool> threadPool_;
 
      ConnectionCallback connectionCallback_;
      MessageCallback messageCallback_;

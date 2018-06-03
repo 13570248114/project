@@ -1,0 +1,31 @@
+#ifndef INETADDRESS_H
+#define INETADDRESS_H
+
+#include <string>
+#include <netinet/in.h>
+
+class InetAddress
+{
+public:
+    explicit InetAddress(uint16_t port = 0);
+    InetAddress(const std::string& ip, uint16_t port);
+
+    void setAddress(const struct sockaddr_in& addr)
+    { addr_ = addr; }
+
+    const struct sockaddr* getSockaddr() const
+    { return reinterpret_cast<const struct sockaddr*>(&addr_); }
+
+    socklen_t getSocklen() const
+    { return sizeof(addr_); }
+
+    std::string toIP() const;
+    uint16_t toPort() const;
+    std::string toIpPort() const;
+
+private:
+    struct sockaddr_in addr_;
+};
+
+#endif // !INETADDRESS_H
+
