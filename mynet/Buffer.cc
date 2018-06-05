@@ -11,11 +11,9 @@
 #include <cerrno>
 #include <sys/uio.h>
 
-#include <tinyev/Buffer.h>
+#include "Buffer.h"
 
 // from muduo:Buffer
-
-using namespace ev;
 
 const char Buffer::kCRLF[] = "\r\n";
 

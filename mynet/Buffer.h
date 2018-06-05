@@ -23,9 +23,6 @@
 #include <cassert>
 #include <cstring>
 
-namespace ev
-{
-
 class Buffer
 {
 public:
@@ -316,6 +313,6 @@ private:
     static const char kCRLF[];
 };
 
-}
+
 
 #endif  // TINYEV_BUFFER_H

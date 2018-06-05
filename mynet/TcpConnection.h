@@ -8,14 +8,19 @@
 #include"Callbacks.h"
 #include"Channel.h"
 #include"InetAddress.h"
-#endif // !TCPCONNECTION_H
+
+
 
 class EventLoop;
 
-class TcpConnection: noncopyable,pubic std::enable_shared_from_this<TcpConnection>
+class TcpConnection: noncopyable,
+                     public std::enable_shared_from_this<TcpConnection>
 {
-    TcpConnection(EventLoop* loop,int sockfd,const InetAddress& local,const InetAddress& peer);
-     ~TcpConnection();
+public:
+    TcpConnection(EventLoop* loop, int sockfd,
+                  const InetAddress& local,
+                  const InetAddress& peer);
+    ~TcpConnection();
 
     void setMessageCallback(const MessageCallback& cb)
     { messageCallback_ = cb; }
@@ -24,6 +29,7 @@ class TcpConnection: noncopyable,pubic std::enable_shared_from_this<TcpConnectio
     void setHighWaterMarkCallback(const HighWaterMarkCallback& cb, size_t mark)
     { highWaterMarkCallback_ = cb; highWaterMark_ = mark; }
 
+    // internal use
     void setCloseCallBack(const CloseCallback& cb)
     { closeCallback_ = cb; }
 
@@ -48,7 +54,7 @@ class TcpConnection: noncopyable,pubic std::enable_shared_from_this<TcpConnectio
     std::any& getContext()
     { return context_; }
 
-     // I/O operations are thread safe
+    // I/O operations are thread safe
     void send(std::string_view data);
     void send(const char* data, size_t len);
     void send(Buffer& buffer);
@@ -90,4 +96,7 @@ private:
     WriteCompleteCallback writeCompleteCallback_;
     HighWaterMarkCallback highWaterMarkCallback_;
     CloseCallback closeCallback_;
-}
+};
+
+
+#endif // !TCPCONNECTION_H
